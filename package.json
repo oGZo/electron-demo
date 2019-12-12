@@ -1,0 +1,17 @@
+{
+  "name": "electron-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=development electron .",
+    "start": "electron .",
+    "build": "cp index.js index.html dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^5.0.0",
+    "puppeteer": "1.15.0"
+  }
+}
