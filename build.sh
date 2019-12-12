@@ -20,6 +20,6 @@ else
   npm run build
 fi
 # 复制src中package.json,main目录移动到dist
-cp ./package.json ./dist/
+cp ./package.json index.html ./dist/
 # 打包
 asar p dist ./app/app.asar 
