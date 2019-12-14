@@ -5,3 +5,4 @@ app
 package-lock.json
 .history
 *.pdf
+.temp

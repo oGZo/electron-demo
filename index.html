@@ -7,13 +7,93 @@
     <title>Document</title>
 </head>
 <body>
+    <input type="text" id="num" placeholder="请输入img个数" value="10">
+    <input type="text" id="url" placeholder="请输入pdf url地址" value="https://www.estudy.cn/activity/learnreportprint?infoNo=4a0e1593eee70f0f23ca&page_info=3">
+    <input type="text" id="dir" placeholder="请输入文件路径">
     <button id="test">test</button>
+    <p>
+        <button id="pause">pause</button>
+    </p>
+    <p> <span id="process">0</span></p>
     <script>
         const { ipcRenderer } = require('electron');
+        let currentList = [];
     document.getElementById('test').addEventListener('click', function() {
-        console.log('test')
-        ipcRenderer.send('genPdf', 666);
+        console.log('click test')
+        let num = parseInt(document.getElementById('num').value.trim() || 1, 10);
+        let url = document.getElementById('url').value.trim() || '';
+        let dir = document.getElementById('dir').value.trim() || '';
+        let list = [];
+        currentList = list;
+        for(let i = 0; i < num; i++){
+            list.push({
+                url,
+                dir,
+                filename: `test-${i}.jpg`,
+            })
+        }
+        ipcRenderer.send('gen', {
+            list,
+            type: 1,
+        });
     })
+    document.getElementById('pause').addEventListener('click', function() {
+        ipcRenderer.send('pauseTask');
+    })
+    ipcRenderer.on('batchTask',(...args) => {
+        let cur = args[1];
+        if(cur.type == 1) {
+            currentList.forEach(v => {
+                if(v.filename === cur.data.filename) {
+                    v.status = 1;
+                } 
+            })
+        }
+        let overLength = currentList.filter(v => v.status == 1).length;
+        
+        document.getElementById('process').innerText = `${overLength}/${currentList.length}`;
+        console.log('batchTask', ...args);
+    })
+
+    function initOpenDevtoolFn() {
+        let times = 0;
+        const sumTimes = 10;
+        let prevTime = null;
+        const interval = 500;
+        let flag = null;
+        const init = () => {
+            times = 0;
+            prevTime = null;
+        }
+        document.addEventListener('click', function(){
+            if(flag){
+                clearTimeout(flag);
+            }
+            flag = setTimeout(() => {
+                flag = null;
+                init();
+            }, 10000);
+
+            let curTime = Date.now();
+            if(!prevTime){
+                times += 1;
+                prevTime = curTime;
+                return;
+            }
+            if(curTime - prevTime < interval){
+                times += 1;
+                prevTime = curTime;
+                return;
+            } 
+        })
+        document.addEventListener('contextmenu', function(){
+            if(times >= sumTimes){
+                init();
+                ipcRenderer.send('openDevtools');
+            }
+        })
+    }
+    initOpenDevtoolFn();
     </script>
 </body>
 </html>
